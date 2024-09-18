@@ -1,29 +1,33 @@
 package com.company.tathminiv2.rest.config;
 
 import io.jmix.core.JmixSecurityFilterChainOrder;
-import io.jmix.security.util.JmixHttpSecurityUtils;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.web.SecurityFilterChain;
 
-@Configuration
-@EnableWebSecurity
+//@Configuration
+//@EnableWebSecurity
 public class SecurityConfig {
 
     @Bean
-    @Order(JmixSecurityFilterChainOrder.CUSTOM)
-    public SecurityFilterChain publicFilterChain(HttpSecurity http) throws Exception {
+    @Order(JmixSecurityFilterChainOrder.FLOWUI - 10)
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                .securityMatcher("/api/**", "/users/**")
+                .securityMatcher("/api/**", "/user/**", "/VAADIN/push/**")
                 .authorizeHttpRequests(requests -> requests
-                                .anyRequest().permitAll()
+//                        .requestMatchers("/login", "/register")
+                                .anyRequest()
+                                .permitAll()
+//                                .anyRequest().hasAnyRole("ADMIN", "ANONYMOUS", "AUTHENTICATED", "USER")
                 )
-                .csrf(AbstractHttpConfigurer::disable);
-        JmixHttpSecurityUtils.configureAnonymous(http);
+                .csrf(AbstractHttpConfigurer::disable)
+
+                .formLogin(Customizer.withDefaults());
 
         return http.build();
     }

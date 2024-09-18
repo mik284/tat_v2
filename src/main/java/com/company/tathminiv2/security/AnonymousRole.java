@@ -2,6 +2,7 @@ package com.company.tathminiv2.security;
 
 import com.company.tathminiv2.entity.OTP;
 import com.company.tathminiv2.entity.TathminiUser;
+import com.company.tathminiv2.entity.User;
 import io.jmix.security.model.EntityAttributePolicyAction;
 import io.jmix.security.model.EntityPolicyAction;
 import io.jmix.security.role.annotation.EntityAttributePolicy;
@@ -14,7 +15,7 @@ public interface AnonymousRole {
     String CODE = "anonymous";
 
     @EntityAttributePolicy(entityClass = TathminiUser.class, attributes = "*", action = EntityAttributePolicyAction.MODIFY)
-    @EntityPolicy(entityClass = TathminiUser.class, actions = EntityPolicyAction.ALL)
+    @EntityPolicy(entityClass = TathminiUser.class, actions = {EntityPolicyAction.CREATE, EntityPolicyAction.READ, EntityPolicyAction.UPDATE, EntityPolicyAction.DELETE})
     void tathminiUser();
 
     @EntityAttributePolicy(entityClass = OTP.class, attributes = "*", action = EntityAttributePolicyAction.MODIFY)
@@ -23,4 +24,8 @@ public interface AnonymousRole {
 
     @SpecificPolicy(resources = {"rest.enabled", "rest.fileDownload.enabled", "rest.fileUpload.enabled"})
     void specific();
+
+    @EntityAttributePolicy(entityClass = User.class, attributes = "*", action = EntityAttributePolicyAction.MODIFY)
+    @EntityPolicy(entityClass = User.class, actions = EntityPolicyAction.ALL)
+    void user();
 }

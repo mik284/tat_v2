@@ -4,13 +4,13 @@ import com.company.tathminiv2.entity.InvestorStatusEnum;
 import com.company.tathminiv2.entity.OTP;
 import com.company.tathminiv2.entity.RiskProfileEnum;
 import com.company.tathminiv2.entity.TathminiUser;
+import com.company.tathminiv2.repository.TathminiUserRepository;
 import com.company.tathminiv2.rest.dto.LoginDto;
 import com.company.tathminiv2.rest.dto.OtpDto;
 import com.company.tathminiv2.rest.exeptions.ItemAlreadyExistsExeption;
 import com.company.tathminiv2.rest.exeptions.ResourceNotFoundExeption;
-//import com.company.tathminiv2.rest.repository.OtpRepository;
-import com.company.tathminiv2.rest.repository.OtpRepository;
-import com.company.tathminiv2.rest.repository.TathminiUserRepository;
+
+
 import com.company.tathminiv2.rest.dto.RegisterDto;
 import io.jmix.core.DataManager;
 import io.jmix.core.SaveContext;
@@ -26,6 +26,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.stereotype.Service;
 
 import java.util.Date;
 import java.util.Optional;
@@ -33,26 +36,25 @@ import java.util.Random;
 
 import static org.reflections.Reflections.log;
 
-@RestService("/api")
+//@RestService("/api")
+@Service
 public class TathminiUserService {
 
+    private final TathminiUserRepository tathminiUserRepository;
     @Autowired
     private DataManager dataManager;
 
-    @Autowired
-    private OtpRepository otpRepository;
+
 
     @Autowired
     private Emailer emailer;
 
-    @Autowired
-    TathminiUserRepository tathminiUserRepository;
+    public TathminiUserService(TathminiUserRepository tathminiUserRepository) {
+        this.tathminiUserRepository = tathminiUserRepository;
+    }
 
 
-
-
-
-    @RestMethod
+    //    @RestMethod
     public void sendOtpToUser(String email, int otpCode, String emailBodyTemplate) throws EmailException {
         String emailBody = String.format(emailBodyTemplate, otpCode);
         EmailInfo emailInfo = EmailInfoBuilder.create()
@@ -65,37 +67,46 @@ public class TathminiUserService {
         emailer.sendEmail(emailInfo);
     }
 
-    @RestMethod
+//    @RestMethod
     public String registerService(RegisterDto registerDto) {
-        try {
-            Optional<TathminiUser> existingUser = dataManager.load(TathminiUser.class)
-                    .query("select t from TathminiUser t " +
-                            "where t.username = :username")
-                    .parameter("username", registerDto.getUsername())
-                    .optional();
 
-            log.info("Existing user: " + existingUser);
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        log.info("Registering user: " + registerDto);
+            try {
+                 Optional<TathminiUser> existingUser = dataManager.load(TathminiUser.class)
+                        .query("select t from TathminiUser t " +
+                                "where t.username = :username")
+                        .parameter("username", registerDto.getUsername())
+                        .optional();
 
-            if (existingUser.isPresent()) {
-                throw new ItemAlreadyExistsExeption("User already exists: " + registerDto.getUsername());
-            } else {
-                TathminiUser user = dataManager.create(TathminiUser.class);
-                user.setFirstName(registerDto.getFirstName());
-                user.setLastName(registerDto.getLastName());
-                user.setEmail(registerDto.getEmail());
-                user.setPassword(registerDto.getPassword());
-                user.setDob(registerDto.getDob());
-                user.setUsername(registerDto.getUsername());
-                user.setPhoneNumber(registerDto.getPhone());
-                user.setInvestorStatus(InvestorStatusEnum.PENDING);
-                user.setRiskProfile(RiskProfileEnum.MODERATE);
-                dataManager.save(user);
-                return "User successfully registered";
+                log.info("Existing user: " + existingUser);
+
+                if (existingUser.isPresent()) {
+                    throw new ItemAlreadyExistsExeption("User already exists: " + registerDto.getUsername());
+                } else {
+
+                    TathminiUser user = dataManager.create(TathminiUser.class);
+                    user.setUsername(registerDto.getUsername());
+                    user.setPassword(registerDto.getPassword());
+                    user.setFirstName(registerDto.getFirstName());
+                    user.setLastName(registerDto.getLastName());
+                    user.setEmail(registerDto.getEmail());
+                    user.setDob(registerDto.getDob());
+                    user.setPhoneNumber(registerDto.getPhone());
+                    user.setRiskProfile(RiskProfileEnum.MODERATE);
+                    user.setInvestorStatus(InvestorStatusEnum.PENDING);
+
+                    tathminiUserRepository.save(user);
+//                    dataManager.save(user);
+                    return "User successfully registered";
+                }
+
             }
-        } catch (Exception e) {
-            System.out.println(e.getMessage());
-            throw new ItemAlreadyExistsExeption("User already exists very sure: " + registerDto.getUsername());
-        }
+            catch (Exception e) {
+                log.error("Error during registration", e);
+                return e.getMessage();
+            }
+
     }
 
     @RestMethod
@@ -143,7 +154,7 @@ public class TathminiUserService {
 
 
         OTP otp = dataManager.load(OTP.class)
-                .query("select o from Otp o where o.tathminiUser = :tathminiUser and o.otpUsed = false")
+                .query("select o from OTP o where o.tathminiUser = :tathminiUser and o.otpUsed = false")
                 .parameter("tathminiUser", user)
                 .maxResults(1)
                 .optional()
@@ -228,7 +239,7 @@ public class TathminiUserService {
     private boolean isOtpExpired(OTP otp) {
         log.debug("Entering isOtpExpired method");
         try {
-            java.util.Date expirationTime = otp.getExpiritationTime();
+            Date expirationTime = otp.getExpiritationTime();
             log.debug("Expiration time: " + expirationTime);
             log.debug("Expiration time class: " + (expirationTime != null ? expirationTime.getClass().getName() : "null"));
 
@@ -237,7 +248,7 @@ public class TathminiUserService {
                 return true;
             }
 
-            boolean isExpired = expirationTime.before(new java.util.Date());
+            boolean isExpired = expirationTime.before(new Date());
             log.debug("Is OTP expired? " + isExpired);
             return isExpired;
         } catch (Exception e) {
@@ -248,9 +259,7 @@ public class TathminiUserService {
         }
     }
 
-    public Page<TathminiUser> getAllUsers(Pageable pageable) {
-        return tathminiUserRepository.findAll(pageable);
-    }
+
 
     private Integer otpGenerator() {
         Random random = new Random();

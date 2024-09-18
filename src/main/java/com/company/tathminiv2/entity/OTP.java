@@ -1,8 +1,11 @@
 package com.company.tathminiv2.entity;
 
+import io.jmix.core.DeletePolicy;
 import io.jmix.core.entity.annotation.JmixGeneratedValue;
+import io.jmix.core.entity.annotation.OnDeleteInverse;
 import io.jmix.core.metamodel.annotation.JmixEntity;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedBy;
@@ -39,6 +42,7 @@ public class OTP {
     @JoinColumn(name = "TATHMINI_USER_ID")
     @OneToOne(fetch = FetchType.LAZY)
     private TathminiUser tathminiUser;
+
 
     @LastModifiedBy
     @Column(name = "LAST_MODIFIED_BY")

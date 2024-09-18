@@ -16,15 +16,15 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedBy;
 import org.springframework.data.annotation.LastModifiedDate;
 
-import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.Date;
 import java.util.UUID;
-
 @JmixEntity
 @Table(name = "TATHMINI_USER")
 @Entity
 public class TathminiUser {
+
+
     @JmixGeneratedValue
     @Column(name = "ID", nullable = false)
     @Id

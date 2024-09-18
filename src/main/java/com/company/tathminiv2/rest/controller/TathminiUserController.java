@@ -1,6 +1,7 @@
 package com.company.tathminiv2.rest.controller;
 
 import com.company.tathminiv2.entity.TathminiUser;
+import com.company.tathminiv2.repository.TathminiUserRepository;
 import com.company.tathminiv2.rest.config.JwtService;
 import com.company.tathminiv2.rest.dto.LoginDto;
 import com.company.tathminiv2.rest.dto.OtpDto;
@@ -22,7 +23,7 @@ import java.util.*;
 @RestController
 @RequestMapping("/users")
 public class TathminiUserController {
-
+    private final TathminiUserRepository tathminiUserRepository;
     private static final Logger log = LoggerFactory.getLogger(TathminiUserController.class);
 
     @Autowired
@@ -31,9 +32,13 @@ public class TathminiUserController {
     @Autowired
     private JwtService jwtService;
 
+    public TathminiUserController(TathminiUserRepository tathminiUserRepository) {
+        this.tathminiUserRepository = tathminiUserRepository;
+    }
+
 
     @PostMapping("/register")
-    public ResponseEntity<String> register(@RequestBody @Valid RegisterDto registerDto) {
+    public ResponseEntity<String> register(@Valid @RequestBody RegisterDto registerDto) {
 
         try {
             log.info(registerDto.toString());
@@ -44,10 +49,12 @@ public class TathminiUserController {
         }
 
     }
-    @GetMapping("/allusers")
-    public ResponseEntity<String> getAllUsers() {
-        return ResponseEntity.ok("Hello World");
-    }
+
+
+@GetMapping()
+public ResponseEntity<Page<TathminiUser>> getUsers(Pageable pageable) {
+    return ResponseEntity.ok(tathminiUserRepository.findAll(pageable));
+}
     @PostMapping("/login")
     public ResponseEntity<String> login(@Valid @RequestBody LoginDto loginDto) {
         String responseMessage = memberService.login(loginDto);
@@ -84,11 +91,7 @@ public class TathminiUserController {
         }
     }
 
-    @GetMapping("/all")
-    public ResponseEntity<Page<TathminiUser>> getAllUsers(Pageable pageable) {
-        Page<TathminiUser> users = memberService.getAllUsers(pageable);
-        return ResponseEntity.ok(users);
-    }
+
 
     @PostMapping("/initiate-password-reset")
     public ResponseEntity<String> initiatePasswordReset(@RequestParam String email) throws EmailException, EmailException {

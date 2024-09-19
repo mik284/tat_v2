@@ -66,4 +66,12 @@
                                  constraintName="FK_OTP_ON_TATHMINI_USER" referencedColumnNames="ID"
                                  referencedTableName="TATHMINI_USER"/>
     </changeSet>
+
+    <changeSet id="4" author="Tathminiv2">
+        <modifyDataType tableName="OTP" columnName="EXPIRITATION_TIME" newDataType="timestamp with time zone"/>
+    </changeSet>
+    <changeSet id="5" author="Tathminiv2">
+        <modifyDataType tableName="TATHMINI_USER" columnName="PASSWORD" newDataType="VARCHAR(255)"/>
+    </changeSet>
+
 </databaseChangeLog>

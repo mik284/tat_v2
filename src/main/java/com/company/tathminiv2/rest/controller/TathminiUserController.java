@@ -3,10 +3,7 @@ package com.company.tathminiv2.rest.controller;
 import com.company.tathminiv2.entity.TathminiUser;
 import com.company.tathminiv2.repository.TathminiUserRepository;
 import com.company.tathminiv2.rest.config.JwtService;
-import com.company.tathminiv2.rest.dto.LoginDto;
-import com.company.tathminiv2.rest.dto.OtpDto;
-import com.company.tathminiv2.rest.dto.RegisterDto;
-import com.company.tathminiv2.rest.dto.UserResponseDto;
+import com.company.tathminiv2.rest.dto.*;
 import com.company.tathminiv2.rest.services.TathminiUserService;
 import io.jmix.email.EmailException;
 import jakarta.validation.Valid;
@@ -99,7 +96,7 @@ public ResponseEntity<Page<TathminiUser>> getUsers(Pageable pageable) {
     }
 
     @PostMapping("/update-password")
-    public ResponseEntity<String> updatePassword(@RequestParam String email, @RequestParam String newPassword) {
-        return memberService.updatePassword(email, newPassword);
+    public ResponseEntity<String> updatePassword(@RequestBody PasswordResetDto passwordResetDto) {
+        return memberService.updatePassword(passwordResetDto);
     }
 }

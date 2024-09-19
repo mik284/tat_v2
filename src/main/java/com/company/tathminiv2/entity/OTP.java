@@ -1,8 +1,6 @@
 package com.company.tathminiv2.entity;
 
-import io.jmix.core.DeletePolicy;
 import io.jmix.core.entity.annotation.JmixGeneratedValue;
-import io.jmix.core.entity.annotation.OnDeleteInverse;
 import io.jmix.core.metamodel.annotation.JmixEntity;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
@@ -12,7 +10,6 @@ import org.springframework.data.annotation.LastModifiedBy;
 import org.springframework.data.annotation.LastModifiedDate;
 
 import java.time.OffsetDateTime;
-import java.util.Date;
 import java.util.UUID;
 
 @JmixEntity
@@ -29,9 +26,9 @@ public class OTP {
     @Column(name = "OTP_CODE")
     private Integer otpCode;
 
+    @NotNull
     @Column(name = "EXPIRITATION_TIME")
-    @Temporal(TemporalType.DATE)
-    private Date expiritationTime;
+    private OffsetDateTime expiritationTime;
 
     @Column(name = "PURPOSE", length = 100)
     private String purpose;
@@ -60,6 +57,22 @@ public class OTP {
     @Column(name = "CREATED_DATE")
     private OffsetDateTime createdDate;
 
+    public void setCreatedDate(OffsetDateTime createdDate) {
+        this.createdDate = createdDate;
+    }
+
+    public OffsetDateTime getCreatedDate() {
+        return createdDate;
+    }
+
+    public void setExpiritationTime(OffsetDateTime expiritationTime) {
+        this.expiritationTime = expiritationTime;
+    }
+
+    public OffsetDateTime getExpiritationTime() {
+        return expiritationTime;
+    }
+
     public TathminiUser getTathminiUser() {
         return tathminiUser;
     }
@@ -84,28 +97,12 @@ public class OTP {
         this.purpose = purpose;
     }
 
-    public Date getExpiritationTime() {
-        return expiritationTime;
-    }
-
-    public void setExpiritationTime(Date expiritationTime) {
-        this.expiritationTime = expiritationTime;
-    }
-
     public Integer getOtpCode() {
         return otpCode;
     }
 
     public void setOtpCode(Integer otpCode) {
         this.otpCode = otpCode;
-    }
-
-    public OffsetDateTime getCreatedDate() {
-        return createdDate;
-    }
-
-    public void setCreatedDate(OffsetDateTime createdDate) {
-        this.createdDate = createdDate;
     }
 
     public String getCreatedBy() {
